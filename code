@@ -1,0 +1,83 @@
+#include <iostream>
+#include <cstdio>
+#include <cctype>
+using namespace std;
+
+enum Token {
+LEFT_BRACKET, RIGHT_BRACKET,
+NUMBER
+};
+
+enum Tree {
+NULLNODE, NODE
+};
+
+Token getToken(int &token){
+int c = getchar();
+while( c == ' ' || c == '\n' ){
+c = getchar();
+}
+
+if( c == '(' ) return LEFT_BRACKET;
+if( c == ')' ) return RIGHT_BRACKET;
+
+int sign = 1;
+if( c == '-' ){
+sign = -1;
+c = getchar();
+}
+
+token = 0;
+while( isdigit(c) ){
+token = token * 10 + (c - '0');
+c = getchar();
+}
+
+token *= sign;
+ungetc(c, stdin);/*pushes the char into stdin. now char is available in stdin.*/
+
+return NUMBER;
+}
+
+Tree parseTree(bool &isMatched, int rootSum, int target){
+int token;
+
+getToken(token); // '('
+
+if( getToken(token) == RIGHT_BRACKET ){
+return NULLNODE;
+}
+
+rootSum += token;
+Tree leftSubTree = parseTree( isMatched, rootSum, target );
+Tree rightSubTree = parseTree( isMatched, rootSum, target );
+
+getToken(token);
+
+if (isMatched) return NODE;
+
+if( leftSubTree == NULLNODE && rightSubTree == NULLNODE ){
+if( rootSum == target ){
+isMatched = true;
+}
+}
+
+return NODE;
+
+}
+
+int main(){
+int target,c;
+//freopen("sample.txt","r",stdin);
+while( scanf("%d", &target) != EOF ){
+bool isMatched = false;
+parseTree(isMatched, 0, target);
+if( isMatched ){
+printf("yes\n");
+}
+else {
+printf("no\n");
+}
+}
+return 0;
+}
